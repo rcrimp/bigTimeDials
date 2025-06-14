@@ -23,3 +23,6 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
     - toggle light/dark mode
     - toggle hourly chime
     - 12/24 hour format
+- [ ] support more devices
+    - Pebble Time Round (Chalk, 180x180)
+    - Core Duo 2 (Emery, 200x280)
