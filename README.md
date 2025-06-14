@@ -4,6 +4,16 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
 
 ![screenshot](screenshot_1.png)
 
+## Build Instructions
+See [Pebble SDK](https://developer.rebble.io)
+
+```bash
+nix-shell # I installed my SDK using Nix on MacOS
+pebble build
+pebble install --phone <your phone's IP>
+pebble install --emulator aplite
+```
+
 ## Changelog
 - 1.2.0
     - added basic support for Chalk and Emery
@@ -17,9 +27,8 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
     - Rubik Semi Bold for date (24px)
     - Rubik Thin for battery percentage (14px)
 
-
 ## Roadmap
-- [ ] open source the code
+- [x] open source the code
 - [ ] optimize memory by unload unused digit bitmaps
 - [ ] add 12-hour support
 - [ ] light mode

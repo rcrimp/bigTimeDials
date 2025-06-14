@@ -2,7 +2,7 @@
 
 // settings
 #define SETTING_BATTERY_PERCENT 0
-#define SETTING_DARK_MODE 1
+#define SETTING_DARK_MODE 1 // no effect
 #define SETTING_HOURLY_CHIME 1
 
 // 2 digits for hour, 2 for minute
