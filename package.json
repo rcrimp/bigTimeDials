@@ -1,0 +1,95 @@
+{
+  "name": "watchface",
+  "author": "MakeAwesomeHappen",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "watchface",
+    "uuid": "f5fc9894-b86c-4b79-9b10-5fe2cc644c2a",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+      "media": [
+        {
+          "type": "font",
+          "name": "FONT_INTER_48",
+          "file": "inter.ttf"
+        },
+        {
+          "type": "font",
+          "name": "FONT_INTER_20",
+          "file": "inter.ttf"
+        },
+        {
+          "type": "bitmap",
+          "name": "IMAGE_BACKGROUND",
+          "file": "background.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "ZERO",
+          "file": "0.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "ONE",
+          "file": "1.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "TWO",
+          "file": "2.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "THREE",
+          "file": "3.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "FOUR",
+          "file": "4.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "FIVE",
+          "file": "5.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "SIX",
+          "file": "6.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "SEVEN",
+          "file": "7.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "EIGHT",
+          "file": "8.png"
+        },
+        {
+          "type": "bitmap",
+          "name": "NINE",
+          "file": "9.png"
+        }
+      ]
+    }
+  }
+}
