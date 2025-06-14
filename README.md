@@ -26,6 +26,7 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
 - [ ] user settings
     - toggle light/dark mode
     - toggle hourly chime
+    - toggle battery percentage
     - 12/24 hour format
 - [x] support more devices
     - Pebble Time Round (Chalk, 180x180)

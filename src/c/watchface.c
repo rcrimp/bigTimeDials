@@ -7,6 +7,7 @@
 // each image is 69x69 pixels
 #define IMG_WIDTH 69
 #define IMG_HEIGHT 69
+#define DIGIT_SPACING 6 // 144 - 69 - 69
 
 static Window *s_main_window;
 
@@ -114,10 +115,12 @@ static void main_window_load(Window *window) {
   int screen_width = bounds.size.w;
 
   GRect digits[4];
-  digits[0] = GRect(0, 0, IMG_WIDTH, IMG_HEIGHT);
-  digits[1] = GRect(screen_width - IMG_WIDTH, 0, IMG_WIDTH, IMG_HEIGHT);
-  digits[2] = GRect(0, screen_height - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
-  digits[3] = GRect(screen_width - IMG_WIDTH, screen_height - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
+  int left_start = (screen_width - IMG_WIDTH * 2 - DIGIT_SPACING) / 2;
+  int right_start = left_start + IMG_WIDTH + DIGIT_SPACING;
+  digits[0] = GRect(left_start, 0, IMG_WIDTH, IMG_HEIGHT);
+  digits[1] = GRect(right_start, 0, IMG_WIDTH, IMG_HEIGHT);
+  digits[2] = GRect(left_start, screen_height - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
+  digits[3] = GRect(right_start, screen_height - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
   
   for (int i = 0; i < DIGIT_COUNT; i++) {
     s_time_digits[i] = bitmap_layer_create(digits[i]);
@@ -126,7 +129,7 @@ static void main_window_load(Window *window) {
   }
 
   // Create battery TextLayer
-  s_battery_layer = text_layer_create(GRect(0, 50, IMG_WIDTH, 14));
+  s_battery_layer = text_layer_create(GRect(left_start, 50, IMG_WIDTH, 14));
   s_battery_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
   text_layer_set_background_color(s_battery_layer, GColorClear);
   text_layer_set_text_color(s_battery_layer, GColorBlack);
@@ -146,7 +149,9 @@ static void main_window_load(Window *window) {
   layer_add_child(window_layer, s_canvas_layer);
 
   // Create date TextLayer
-  s_date_layer = text_layer_create(GRect(0, IMG_HEIGHT, bounds.size.w, 24));
+  static int date_font_size = 24;
+  GRect date_bounds = GRect(0, (screen_height - date_font_size)/2 - 3, bounds.size.w, date_font_size);
+  s_date_layer = text_layer_create(date_bounds);
   s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_24));
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text_color(s_date_layer, GColorWhite);
