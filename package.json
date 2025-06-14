@@ -1,12 +1,12 @@
 {
-  "name": "bigtime2",
+  "name": "bigtime",
   "author": "Reuben Crimp",
   "version": "1.1.0",
   "keywords": ["pebble-app"],
   "private": false,
   "dependencies": {},
   "pebble": {
-    "displayName": "bigTime2",
+    "displayName": "bigTime",
     "uuid": "f5fc9894-b86c-4b79-9b10-5fe2cc644c2a",
     "sdkVersion": "3",
     "enableMultiJS": true,
