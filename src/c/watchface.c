@@ -1,24 +1,31 @@
 #include <pebble.h>
-  
+
+// 2 digits for hour, 2 for minute
 #define DIGIT_COUNT 4
-#define IMAGE_COUNT 10 
+// 10 images for digits 0-9
+#define IMAGE_COUNT 10
+// each image is 69x69 pixels
 #define IMG_WIDTH 69
 #define IMG_HEIGHT 69
-#define DIGIT_PADDING 2
 
+#define DIGIT_PADDING 2
 #define SCREEN_WIDTH 144
 #define SCREEN_HEIGHT 168
 
 static Window *s_main_window;
 
-static TextLayer *s_date_layer;
-static TextLayer *s_battery_layer; 
+// fonts
 static GFont s_date_font;
 static GFont s_battery_font;
-
+// text layers
+static TextLayer *s_date_layer;
+static TextLayer *s_battery_layer; 
+// 4 image layers (hhmm)
 static BitmapLayer *s_time_digits[DIGIT_COUNT];
+// 10 images buffers (0-9)
 static GBitmap *s_image_numbers[IMAGE_COUNT];
 
+// memory for previous state, to avoid unnecessary updates
 static int s_prev_digits[DIGIT_COUNT] = {-1, -1, -1, -1};
 static char s_prev_date[11] = "";
 static int s_prev_battery_percent = -1;
@@ -156,11 +163,12 @@ static void main_window_unload(Window *window) {
 }
  
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  // update time and date on screen
   update_time();
+  // hourly chime
   if (tick_time->tm_min == 0 && !quiet_time_is_active()) {
     vibes_double_pulse();
   }
-  
 }
 
 static void battery_handler(BatteryChargeState charge_state) {
@@ -176,6 +184,7 @@ static void init() {
   });
   window_stack_push(s_main_window, true);
   
+  // update time every minute
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   battery_state_service_subscribe(battery_handler);
 }
