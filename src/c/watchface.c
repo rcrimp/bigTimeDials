@@ -1,28 +1,70 @@
 #include <pebble.h>
   
-#define KEY_TEMPERATURE 0
-#define KEY_CONDITIONS  1
-  
-static Window *s_main_window;
-static TextLayer *s_time_layer;
- 
-static GFont s_time_font;
- 
-static BitmapLayer *s_background_hour_0;
+#define DIGIT_COUNT 4
+#define IMAGE_COUNT 10 
+#define IMG_WIDTH 69
+#define IMG_HEIGHT 69
+#define DIGIT_PADDING 2
 
-static GBitmap *s_image_numbers[10];
- 
+#define SCREEN_WIDTH 144
+#define SCREEN_HEIGHT 168
+
+static Window *s_main_window;
+
+static TextLayer *s_date_layer;
+static TextLayer *s_battery_layer; 
+static GFont s_date_font;
+static GFont s_battery_font;
+
+static BitmapLayer *s_time_digits[DIGIT_COUNT];
+static GBitmap *s_image_numbers[IMAGE_COUNT];
+
+static void update_battery() {
+  // Get the current battery state
+  BatteryChargeState charge_state = battery_state_service_peek();
+  
+  // Create a buffer to hold the battery percentage
+  static char s_battery_buffer[8];
+  
+  // Format the battery percentage into the buffer
+  snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", charge_state.charge_percent);
+  
+  // Set the text of the battery layer to the formatted string
+  text_layer_set_text(s_battery_layer, s_battery_buffer);
+  
+  // Update the display
+  layer_mark_dirty(text_layer_get_layer(s_battery_layer));
+}
+
 static void update_time() {
   // Get a tm structure
   time_t temp = time(NULL); 
   struct tm *tick_time = localtime(&temp);
  
-  // Write the current hours and minutes into a buffer
-  static char s_buffer[8];
-  strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ? "%H:%M" : "%I:%M", tick_time);
+  // Write the date into a buffer
+  static char s_buffer[11];
+  strftime(s_buffer, sizeof(s_buffer), "%a %d %b", tick_time);
  
   // Display this time on the TextLayer
-  text_layer_set_text(s_time_layer, s_buffer);
+  text_layer_set_text(s_date_layer, s_buffer);
+
+  // current hours and minutes into image buffer(s)
+  int hours = tick_time->tm_hour;
+  int minutes = tick_time->tm_min;
+  int hour_tens = hours / 10;
+  int hour_ones = hours % 10;
+  int minute_tens = minutes / 10;
+  int minute_ones = minutes % 10;
+  // Set the images for each digit
+  bitmap_layer_set_bitmap(s_time_digits[0], s_image_numbers[hour_tens]);
+  bitmap_layer_set_bitmap(s_time_digits[1], s_image_numbers[hour_ones]);
+  bitmap_layer_set_bitmap(s_time_digits[2], s_image_numbers[minute_tens]);
+  bitmap_layer_set_bitmap(s_time_digits[3], s_image_numbers[minute_ones]);
+  // Update the display
+  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[0]));
+  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[1]));
+  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[2]));
+  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[3]));
 }
  
 static void main_window_load(Window *window) {
@@ -43,59 +85,101 @@ static void main_window_load(Window *window) {
 
 
   // Create BitmapLayer to display the GBitmap
-  s_background_hour_0 = bitmap_layer_create(bounds);
-  bitmap_layer_set_bitmap(s_background_hour_0, s_image_numbers[0]);
-  layer_add_child(window_layer, bitmap_layer_get_layer(s_background_hour_0));
+  s_time_digits[0] = bitmap_layer_create(GRect(DIGIT_PADDING, 0, IMG_WIDTH, IMG_HEIGHT));
+  bitmap_layer_set_bitmap(s_time_digits[0], s_image_numbers[0]);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_time_digits[0]));
+
+  s_time_digits[1] = bitmap_layer_create(GRect(IMG_WIDTH + DIGIT_PADDING * 2, 0, IMG_WIDTH, IMG_HEIGHT));
+  bitmap_layer_set_bitmap(s_time_digits[1], s_image_numbers[0]);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_time_digits[1]));
+
+
+  s_time_digits[2] = bitmap_layer_create(GRect(DIGIT_PADDING, SCREEN_HEIGHT - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT));
+  bitmap_layer_set_bitmap(s_time_digits[2], s_image_numbers[0]);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_time_digits[2]));
+
+  s_time_digits[3] = bitmap_layer_create(GRect(IMG_WIDTH + DIGIT_PADDING * 2, SCREEN_HEIGHT - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT));
+  bitmap_layer_set_bitmap(s_time_digits[3], s_image_numbers[0]);
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_time_digits[3]));
+
+  // Create battery TextLayer
+  s_battery_layer = text_layer_create(
+    GRect(DIGIT_PADDING, 50, IMG_WIDTH, 14));
+  text_layer_set_background_color(s_battery_layer, GColorClear);
+  text_layer_set_text_color(s_battery_layer, GColorBlack);
+  text_layer_set_text(s_battery_layer, "100%");
   
-  // Create time TextLayer
-  s_time_layer = text_layer_create(
-    GRect(0, 0, bounds.size.w, 50));
-  text_layer_set_background_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_time_layer, GColorBlack);
-  text_layer_set_text(s_time_layer, "00:00");
-  
-  // Create GFont
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INTER_20));
- 
-  // Apply to TextLayer
-  text_layer_set_font(s_time_layer, s_time_font);
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
+  s_battery_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
+
+  text_layer_set_font(s_battery_layer, s_battery_font);
+  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
+
 
   
+  
+  // Create date TextLayer
+  s_date_layer = text_layer_create(
+    GRect(0, IMG_HEIGHT, bounds.size.w, 24));
+  text_layer_set_background_color(s_date_layer, GColorClear);
+  text_layer_set_text_color(s_date_layer, GColorWhite);
+  text_layer_set_text(s_date_layer, "Sat 14 Jun");
+  
+  // Create GFont
+  s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_24));
+
+  // Apply to TextLayer
+  text_layer_set_font(s_date_layer, s_date_font);
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+  layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
+
   // Make sure the time is displayed from the start
   update_time();
+  update_battery();
 }
  
 static void main_window_unload(Window *window) {
-  fonts_unload_custom_font(s_time_font);
+  fonts_unload_custom_font(s_date_font);
+  fonts_unload_custom_font(s_battery_font);
+  text_layer_destroy(s_date_layer);
+  text_layer_destroy(s_battery_layer);
   
-  gbitmap_destroy(s_image_numbers);
- 
-  bitmap_layer_destroy(s_background_hour_0);
-  text_layer_destroy(s_time_layer);
+  for (int i = 0; i < DIGIT_COUNT; i++) {
+    if (s_time_digits[i] != NULL) {
+      bitmap_layer_destroy(s_time_digits[i]);
+    }
+  }
+  for (int i = 0; i < IMAGE_COUNT; i++) {
+    if (s_image_numbers[i] != NULL) {
+      gbitmap_destroy(s_image_numbers[i]);
+    }
+  }
 }
  
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  // Update the time every second
   update_time();
+  
+}
+
+static void battery_handler(BatteryChargeState charge_state) {
+  update_battery();
 }
   
 static void init() {
-  // Create main Window element and assign to pointer
   s_main_window = window_create();
-  window_set_background_color(s_main_window, GColorWhite);
+  window_set_background_color(s_main_window, GColorBlack);
   window_set_window_handlers(s_main_window, (WindowHandlers) {
     .load = main_window_load,
     .unload = main_window_unload
   });
   window_stack_push(s_main_window, true);
   
-  // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  battery_state_service_subscribe(battery_handler);
 }
  
 static void deinit() {
-  // Destroy Window
   window_destroy(s_main_window);
 }
  

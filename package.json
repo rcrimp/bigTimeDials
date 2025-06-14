@@ -1,12 +1,12 @@
 {
-  "name": "watchface",
-  "author": "MakeAwesomeHappen",
+  "name": "bigtime",
+  "author": "Reuben Crimp",
   "version": "1.0.0",
   "keywords": ["pebble-app"],
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "watchface",
+    "displayName": "bigTime",
     "uuid": "f5fc9894-b86c-4b79-9b10-5fe2cc644c2a",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -17,8 +17,9 @@
       "diorite"
     ],
     "watchapp": {
-      "watchface": false
+      "watchface": true
     },
+    "type": "watchface",
     "messageKeys": [
       "dummy"
     ],
@@ -26,18 +27,13 @@
       "media": [
         {
           "type": "font",
-          "name": "FONT_INTER_48",
-          "file": "inter.ttf"
+          "name": "FONT_RUBIK_14",
+          "file": "rubik.ttf"
         },
         {
           "type": "font",
-          "name": "FONT_INTER_20",
-          "file": "inter.ttf"
-        },
-        {
-          "type": "bitmap",
-          "name": "IMAGE_BACKGROUND",
-          "file": "background.png"
+          "name": "FONT_RUBIK_24",
+          "file": "rubik-semi-bold.ttf"
         },
         {
           "type": "bitmap",
