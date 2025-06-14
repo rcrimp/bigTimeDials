@@ -5,6 +5,9 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
 ![screenshot](screenshot_1.png)
 
 ## Changelog
+- 1.2.0
+    - added basic support for Chalk and Emery
+    - battery bar
 - 1.1.0
     - added hourly chime
 - 1.0.0
@@ -13,6 +16,7 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
     - Rubik Mono One font for time (70px)
     - Rubik Semi Bold for date (24px)
     - Rubik Thin for battery percentage (14px)
+
 
 ## Roadmap
 - [ ] open source the code
@@ -23,6 +27,6 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
     - toggle light/dark mode
     - toggle hourly chime
     - 12/24 hour format
-- [ ] support more devices
+- [x] support more devices
     - Pebble Time Round (Chalk, 180x180)
     - Core Duo 2 (Emery, 200x280)

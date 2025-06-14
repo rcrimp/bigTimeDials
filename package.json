@@ -1,7 +1,7 @@
 {
   "name": "bigtime",
   "author": "Reuben Crimp",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": ["pebble-app"],
   "private": false,
   "dependencies": {},
@@ -13,7 +13,9 @@
     "targetPlatforms": [
       "aplite",
       "basalt",
-      "diorite"
+      "chalk",
+      "diorite",
+      "emery"
     ],
     "watchapp": {
       "watchface": true

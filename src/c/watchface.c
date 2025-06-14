@@ -20,14 +20,19 @@ static TextLayer *s_battery_layer;
 static BitmapLayer *s_time_digits[DIGIT_COUNT];
 // 10 images buffers (0-9)
 static GBitmap *s_image_numbers[IMAGE_COUNT];
+// ? layer
+static Layer *s_battery_bar_layer;
+static Layer *s_canvas_layer;
 
 // memory for previous state, to avoid unnecessary updates
 static int s_prev_digits[DIGIT_COUNT] = {-1, -1, -1, -1};
 static char s_prev_date[11] = "";
 static int s_prev_battery_percent = -1;
+static int s_battery_level;
 
 static void update_battery() {
   BatteryChargeState charge_state = battery_state_service_peek();
+  s_battery_level = charge_state.charge_percent;
   if (charge_state.charge_percent == s_prev_battery_percent) return;
 
   s_prev_battery_percent = charge_state.charge_percent;
@@ -37,6 +42,20 @@ static void update_battery() {
   layer_mark_dirty(text_layer_get_layer(s_battery_layer));
 }
 
+static void battery_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+
+  // Find the width of the bar (total width = 114px)
+  int width = (s_battery_level * bounds.size.w) / 100;
+
+  // Draw the background
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+
+  // Draw the bar
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, GRect(0, 0, width, bounds.size.h), 0, GCornerNone);
+}
 
 static void update_time() {
   time_t temp = time(NULL); 
@@ -66,6 +85,12 @@ static void update_time() {
       layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[i]));
     }
   }
+}
+
+static void underline_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 }
 
  
@@ -110,6 +135,16 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
 
+  // Create battery meter Layer
+  s_battery_bar_layer = layer_create(GRect(0, IMG_HEIGHT + 3, screen_width, 2));
+  layer_set_update_proc(s_battery_bar_layer, battery_update_proc);
+  layer_add_child(window_get_root_layer(window), s_battery_bar_layer);
+
+  GRect underline = GRect(0, screen_height - IMG_HEIGHT - 4, screen_width, 2);
+  s_canvas_layer = layer_create(underline);
+  layer_set_update_proc(s_canvas_layer, underline_update_proc);
+  layer_add_child(window_layer, s_canvas_layer);
+
   // Create date TextLayer
   s_date_layer = text_layer_create(GRect(0, IMG_HEIGHT, bounds.size.w, 24));
   s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_24));
@@ -130,6 +165,8 @@ static void main_window_unload(Window *window) {
   fonts_unload_custom_font(s_battery_font);
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_battery_layer);
+  layer_destroy(s_battery_bar_layer);
+
   
   for (int i = 0; i < DIGIT_COUNT; i++) {
     if (s_time_digits[i] != NULL) {
@@ -154,6 +191,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
 static void battery_handler(BatteryChargeState charge_state) {
   update_battery();
+  layer_mark_dirty(s_battery_bar_layer);
 }
   
 static void init() {
