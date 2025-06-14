@@ -19,53 +19,52 @@ static GFont s_battery_font;
 static BitmapLayer *s_time_digits[DIGIT_COUNT];
 static GBitmap *s_image_numbers[IMAGE_COUNT];
 
+static int s_prev_digits[DIGIT_COUNT] = {-1, -1, -1, -1};
+static char s_prev_date[11] = "";
+static int s_prev_battery_percent = -1;
+
 static void update_battery() {
-  // Get the current battery state
   BatteryChargeState charge_state = battery_state_service_peek();
-  
-  // Create a buffer to hold the battery percentage
+  if (charge_state.charge_percent == s_prev_battery_percent) return;
+
+  s_prev_battery_percent = charge_state.charge_percent;
   static char s_battery_buffer[8];
-  
-  // Format the battery percentage into the buffer
   snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", charge_state.charge_percent);
-  
-  // Set the text of the battery layer to the formatted string
   text_layer_set_text(s_battery_layer, s_battery_buffer);
-  
-  // Update the display
   layer_mark_dirty(text_layer_get_layer(s_battery_layer));
 }
 
+
 static void update_time() {
-  // Get a tm structure
   time_t temp = time(NULL); 
   struct tm *tick_time = localtime(&temp);
- 
-  // Write the date into a buffer
+
+  // Update date string only if changed
   static char s_buffer[11];
   strftime(s_buffer, sizeof(s_buffer), "%a %d %b", tick_time);
- 
-  // Display this time on the TextLayer
-  text_layer_set_text(s_date_layer, s_buffer);
+  if (strncmp(s_prev_date, s_buffer, sizeof(s_buffer)) != 0) {
+    strcpy(s_prev_date, s_buffer);
+    text_layer_set_text(s_date_layer, s_buffer);
+  }
 
-  // current hours and minutes into image buffer(s)
-  int hours = tick_time->tm_hour;
-  int minutes = tick_time->tm_min;
-  int hour_tens = hours / 10;
-  int hour_ones = hours % 10;
-  int minute_tens = minutes / 10;
-  int minute_ones = minutes % 10;
-  // Set the images for each digit
-  bitmap_layer_set_bitmap(s_time_digits[0], s_image_numbers[hour_tens]);
-  bitmap_layer_set_bitmap(s_time_digits[1], s_image_numbers[hour_ones]);
-  bitmap_layer_set_bitmap(s_time_digits[2], s_image_numbers[minute_tens]);
-  bitmap_layer_set_bitmap(s_time_digits[3], s_image_numbers[minute_ones]);
-  // Update the display
-  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[0]));
-  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[1]));
-  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[2]));
-  layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[3]));
+  // Extract digits
+  int digits[DIGIT_COUNT] = {
+    tick_time->tm_hour / 10,
+    tick_time->tm_hour % 10,
+    tick_time->tm_min / 10,
+    tick_time->tm_min % 10
+  };
+
+  // Set only changed digits
+  for (int i = 0; i < DIGIT_COUNT; ++i) {
+    if (s_prev_digits[i] != digits[i]) {
+      s_prev_digits[i] = digits[i];
+      bitmap_layer_set_bitmap(s_time_digits[i], s_image_numbers[digits[i]]);
+      layer_mark_dirty(bitmap_layer_get_layer(s_time_digits[i]));
+    }
+  }
 }
+
  
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
