@@ -1,19 +1,18 @@
 {
-  "name": "bigtime",
+  "name": "bigtime2",
   "author": "Reuben Crimp",
   "version": "1.0.1",
   "keywords": ["pebble-app"],
-  "private": true,
+  "private": false,
   "dependencies": {},
   "pebble": {
-    "displayName": "bigTime",
+    "displayName": "bigTime2",
     "uuid": "f5fc9894-b86c-4b79-9b10-5fe2cc644c2a",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
       "aplite",
       "basalt",
-      "chalk",
       "diorite"
     ],
     "watchapp": {
