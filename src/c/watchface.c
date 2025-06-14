@@ -1,5 +1,10 @@
 #include <pebble.h>
 
+// settings
+#define SETTING_BATTERY_PERCENT 0
+#define SETTING_DARK_MODE 1
+#define SETTING_HOURLY_CHIME 1
+
 // 2 digits for hour, 2 for minute
 #define DIGIT_COUNT 4
 // 10 images for digits 0-9
@@ -7,7 +12,10 @@
 // each image is 69x69 pixels
 #define IMG_WIDTH 69
 #define IMG_HEIGHT 69
+
+// layout
 #define DIGIT_SPACING 6 // 144 - 69 - 69
+#define BAR_HEIGHT 2
 
 static Window *s_main_window;
 
@@ -34,6 +42,8 @@ static int s_battery_level;
 static void update_battery() {
   BatteryChargeState charge_state = battery_state_service_peek();
   s_battery_level = charge_state.charge_percent;
+  
+  if (!SETTING_BATTERY_PERCENT) return;
   if (charge_state.charge_percent == s_prev_battery_percent) return;
 
   s_prev_battery_percent = charge_state.charge_percent;
@@ -93,7 +103,6 @@ static void underline_update_proc(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 }
-
  
 static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
@@ -129,21 +138,23 @@ static void main_window_load(Window *window) {
   }
 
   // Create battery TextLayer
-  s_battery_layer = text_layer_create(GRect(left_start, 50, IMG_WIDTH, 14));
-  s_battery_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
-  text_layer_set_background_color(s_battery_layer, GColorClear);
-  text_layer_set_text_color(s_battery_layer, GColorBlack);
-  text_layer_set_text(s_battery_layer, "100%");
-  text_layer_set_font(s_battery_layer, s_battery_font);
-  text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
+  if (SETTING_BATTERY_PERCENT) {
+    s_battery_layer = text_layer_create(GRect(left_start, 50, IMG_WIDTH, 14));
+    s_battery_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
+    text_layer_set_background_color(s_battery_layer, GColorClear);
+    text_layer_set_text_color(s_battery_layer, GColorBlack);
+    text_layer_set_text(s_battery_layer, "100%");
+    text_layer_set_font(s_battery_layer, s_battery_font);
+    text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
+    layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
+  }
 
   // Create battery meter Layer
-  s_battery_bar_layer = layer_create(GRect(0, IMG_HEIGHT + 3, screen_width, 2));
+  s_battery_bar_layer = layer_create(GRect(0, IMG_HEIGHT + 3, screen_width, BAR_HEIGHT));
   layer_set_update_proc(s_battery_bar_layer, battery_update_proc);
   layer_add_child(window_get_root_layer(window), s_battery_bar_layer);
 
-  GRect underline = GRect(0, screen_height - IMG_HEIGHT - 4, screen_width, 2);
+  GRect underline = GRect(0, screen_height - IMG_HEIGHT - 4, screen_width, BAR_HEIGHT);
   s_canvas_layer = layer_create(underline);
   layer_set_update_proc(s_canvas_layer, underline_update_proc);
   layer_add_child(window_layer, s_canvas_layer);
@@ -189,7 +200,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // update time and date on screen
   update_time();
   // hourly chime
-  if (tick_time->tm_min == 0 && !quiet_time_is_active()) {
+  if (SETTING_HOURLY_CHIME && tick_time->tm_min == 0 && !quiet_time_is_active()) {
     vibes_double_pulse();
   }
 }

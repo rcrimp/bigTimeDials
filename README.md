@@ -9,7 +9,7 @@ Pebble watchface that displays the time in a large format. Easy readability. Dat
     - added basic support for Chalk and Emery
     - battery bar
 - 1.1.0
-    - added hourly chime
+    - added hourly chime (double pulse vibrate)
 - 1.0.0
     - initial release
     - 24-hour only
