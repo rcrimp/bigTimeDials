@@ -157,8 +157,10 @@ static void main_window_unload(Window *window) {
 }
  
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  // Update the time every second
   update_time();
+  if (tick_time->tm_min == 0 && !quiet_time_is_active()) {
+    vibes_double_pulse();
+  }
   
 }
 
