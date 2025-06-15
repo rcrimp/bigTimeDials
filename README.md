@@ -2,8 +2,7 @@
 
 Pebble watchface that displays the time in a large format. Easy readability. Date is show relatively large. And battery percentage is tiny, always visibly on the foor of the hour 0/1/2.
 
-![screenshot](screenshot_1.png)
-
+![screenshot](scr_aplite.png)
 ## Build Instructions
 See [Pebble SDK](https://developer.rebble.io)
 
@@ -28,15 +27,15 @@ pebble install --emulator aplite
     - Rubik Thin for battery percentage (14px)
 
 ## Roadmap
-- [x] open source the code
-- [ ] optimize memory by unload unused digit bitmaps
-- [ ] add 12-hour support
-- [ ] light mode
-- [ ] user settings
+- [x] Open source the code.
+- [ ] Optimize memory. Unloading unused bitmaps.
+- [ ] Add 12-hour support?
+- [ ] Light mode.
+- [ ] User settings.
     - toggle light/dark mode
     - toggle hourly chime
-    - toggle battery percentage
+    - ~~toggle battery percentage~~
     - 12/24 hour format
-- [x] support more devices
-    - Pebble Time Round (Chalk, 180x180)
-    - Core Duo 2 (Emery, 200x280)
+- [x] Support more devices.
+    - [x] Pebble Time Round (Chalk, 180x180)
+    - [x] Core Duo 2 (Emery, 200x280)

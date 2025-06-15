@@ -14,7 +14,8 @@
 #define IMG_HEIGHT 69
 
 // layout
-#define DIGIT_SPACING 6 // 144 - 69 - 69
+#define DIGIT_HORIZONTAL_SPACING 6 // 144 - 69 - 69
+#define DIGIT_VERICAL_SPACING 30 // 168 - 69 - 69
 #define BAR_HEIGHT 2
 
 static Window *s_main_window;
@@ -43,14 +44,15 @@ static void update_battery() {
   BatteryChargeState charge_state = battery_state_service_peek();
   s_battery_level = charge_state.charge_percent;
   
-  if (!SETTING_BATTERY_PERCENT) return;
   if (charge_state.charge_percent == s_prev_battery_percent) return;
-
   s_prev_battery_percent = charge_state.charge_percent;
-  static char s_battery_buffer[8];
-  snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", charge_state.charge_percent);
-  text_layer_set_text(s_battery_layer, s_battery_buffer);
-  layer_mark_dirty(text_layer_get_layer(s_battery_layer));
+  
+  if (SETTING_BATTERY_PERCENT) {
+    static char s_battery_buffer[8];
+    layer_mark_dirty(text_layer_get_layer(s_battery_layer));
+    snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", charge_state.charge_percent);
+    text_layer_set_text(s_battery_layer, s_battery_buffer);
+  }
 }
 
 static void battery_update_proc(Layer *layer, GContext *ctx) {
@@ -124,12 +126,15 @@ static void main_window_load(Window *window) {
   int screen_width = bounds.size.w;
 
   GRect digits[4];
-  int left_start = (screen_width - IMG_WIDTH * 2 - DIGIT_SPACING) / 2;
-  int right_start = left_start + IMG_WIDTH + DIGIT_SPACING;
-  digits[0] = GRect(left_start, 0, IMG_WIDTH, IMG_HEIGHT);
-  digits[1] = GRect(right_start, 0, IMG_WIDTH, IMG_HEIGHT);
-  digits[2] = GRect(left_start, screen_height - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
-  digits[3] = GRect(right_start, screen_height - IMG_HEIGHT, IMG_WIDTH, IMG_HEIGHT);
+  int left_start = (screen_width - IMG_WIDTH * 2 - DIGIT_HORIZONTAL_SPACING) / 2;
+  int right_start = left_start + IMG_WIDTH + DIGIT_HORIZONTAL_SPACING;
+  int top_start = (screen_height - IMG_HEIGHT * 2 - DIGIT_VERICAL_SPACING) / 2;
+  int bottom_start = top_start + IMG_HEIGHT + DIGIT_VERICAL_SPACING;
+
+  digits[0] = GRect(left_start, top_start, IMG_WIDTH, IMG_HEIGHT);
+  digits[1] = GRect(right_start, top_start, IMG_WIDTH, IMG_HEIGHT);
+  digits[2] = GRect(left_start, bottom_start, IMG_WIDTH, IMG_HEIGHT);
+  digits[3] = GRect(right_start, bottom_start, IMG_WIDTH, IMG_HEIGHT);
   
   for (int i = 0; i < DIGIT_COUNT; i++) {
     s_time_digits[i] = bitmap_layer_create(digits[i]);
@@ -139,7 +144,8 @@ static void main_window_load(Window *window) {
 
   // Create battery TextLayer
   if (SETTING_BATTERY_PERCENT) {
-    s_battery_layer = text_layer_create(GRect(left_start, 50, IMG_WIDTH, 14));
+    int battery_top = screen_height / 2 - DIGIT_VERICAL_SPACING - 3; // 50
+    s_battery_layer = text_layer_create(GRect(left_start, battery_top, IMG_WIDTH, 14));
     s_battery_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
     text_layer_set_background_color(s_battery_layer, GColorClear);
     text_layer_set_text_color(s_battery_layer, GColorBlack);
@@ -150,11 +156,13 @@ static void main_window_load(Window *window) {
   }
 
   // Create battery meter Layer
-  s_battery_bar_layer = layer_create(GRect(0, IMG_HEIGHT + 3, screen_width, BAR_HEIGHT));
+  int x = (screen_height) / 2 - DIGIT_HORIZONTAL_SPACING - 6;
+  s_battery_bar_layer = layer_create(GRect(0, x, screen_width, BAR_HEIGHT));
   layer_set_update_proc(s_battery_bar_layer, battery_update_proc);
   layer_add_child(window_get_root_layer(window), s_battery_bar_layer);
 
-  GRect underline = GRect(0, screen_height - IMG_HEIGHT - 4, screen_width, BAR_HEIGHT);
+  int y = (screen_height) / 2 + DIGIT_HORIZONTAL_SPACING + 6;
+  GRect underline = GRect(0, y, screen_width, BAR_HEIGHT);
   s_canvas_layer = layer_create(underline);
   layer_set_update_proc(s_canvas_layer, underline_update_proc);
   layer_add_child(window_layer, s_canvas_layer);
@@ -180,9 +188,11 @@ static void main_window_unload(Window *window) {
   fonts_unload_custom_font(s_date_font);
   fonts_unload_custom_font(s_battery_font);
   text_layer_destroy(s_date_layer);
-  text_layer_destroy(s_battery_layer);
+  if (s_battery_layer != NULL) {
+    text_layer_destroy(s_battery_layer);
+  }
   layer_destroy(s_battery_bar_layer);
-
+  layer_destroy(s_canvas_layer);
   
   for (int i = 0; i < DIGIT_COUNT; i++) {
     if (s_time_digits[i] != NULL) {
