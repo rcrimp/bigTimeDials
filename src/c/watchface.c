@@ -47,12 +47,12 @@ static void update_battery() {
   if (charge_state.charge_percent == s_prev_battery_percent) return;
   s_prev_battery_percent = charge_state.charge_percent;
   
-  if (SETTING_BATTERY_PERCENT) {
+  #if SETTING_BATTERY_PERCENT
     static char s_battery_buffer[8];
     layer_mark_dirty(text_layer_get_layer(s_battery_layer));
     snprintf(s_battery_buffer, sizeof(s_battery_buffer), "%d%%", charge_state.charge_percent);
     text_layer_set_text(s_battery_layer, s_battery_buffer);
-  }
+  #endif
 }
 
 static void battery_update_proc(Layer *layer, GContext *ctx) {
@@ -143,7 +143,7 @@ static void main_window_load(Window *window) {
   }
 
   // Create battery TextLayer
-  if (SETTING_BATTERY_PERCENT) {
+  #if SETTING_BATTERY_PERCENT
     int battery_top = screen_height / 2 - DIGIT_VERICAL_SPACING - 3; // 50
     s_battery_layer = text_layer_create(GRect(left_start, battery_top, IMG_WIDTH, 14));
     s_battery_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
@@ -153,7 +153,7 @@ static void main_window_load(Window *window) {
     text_layer_set_font(s_battery_layer, s_battery_font);
     text_layer_set_text_alignment(s_battery_layer, GTextAlignmentCenter);
     layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
-  }
+  #endif
 
   // Create battery meter Layer
   int x = (screen_height) / 2 - DIGIT_HORIZONTAL_SPACING - 6;
@@ -185,15 +185,24 @@ static void main_window_load(Window *window) {
 }
  
 static void main_window_unload(Window *window) {
-  fonts_unload_custom_font(s_date_font);
-  fonts_unload_custom_font(s_battery_font);
-  text_layer_destroy(s_date_layer);
+  if (s_date_font != NULL) {
+    fonts_unload_custom_font(s_date_font);
+  }
+  if (s_battery_font != NULL) {
+    fonts_unload_custom_font(s_battery_font);
+  }
+  if (s_date_layer != NULL) {
+    text_layer_destroy(s_date_layer);
+  }
   if (s_battery_layer != NULL) {
     text_layer_destroy(s_battery_layer);
   }
-  layer_destroy(s_battery_bar_layer);
-  layer_destroy(s_canvas_layer);
-  
+  if (s_battery_bar_layer != NULL) {
+    layer_destroy(s_battery_bar_layer);
+  }
+  if (s_canvas_layer != NULL) {
+    layer_destroy(s_canvas_layer);
+  }
   for (int i = 0; i < DIGIT_COUNT; i++) {
     if (s_time_digits[i] != NULL) {
       bitmap_layer_destroy(s_time_digits[i]);
