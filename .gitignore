@@ -1,0 +1,8 @@
+# pebble stuff
+build/*
+.lock-waf_*
+
+
+# os stuff
+.DS_Store
+*.swp
