@@ -2,7 +2,9 @@
   "name": "bigtime",
   "author": "Reuben Crimp",
   "version": "1.2.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": false,
   "dependencies": {},
   "pebble": {
@@ -34,6 +36,11 @@
         {
           "type": "font",
           "name": "FONT_RUBIK_24",
+          "file": "rubik-semi-bold.ttf"
+        },
+        {
+          "type": "font",
+          "name": "FONT_RUBIK_48",
           "file": "rubik-semi-bold.ttf"
         },
         {
