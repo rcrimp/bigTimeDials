@@ -1,10 +1,10 @@
 #include <pebble.h>
 #include <stdlib.h>
 #include <string.h>
-#include "widget.h"
+#include "radial.h"
 
-void widget_update(Layer *layer, GContext *ctx) {
-    Widget *widget = *(Widget **)layer_get_data(layer);
+void widget_radial_update(Layer *layer, GContext *ctx) {
+    RadialWidget *widget = *(RadialWidget **)layer_get_data(layer);
     GRect bounds = layer_get_bounds(layer);
 
     graphics_context_set_fill_color(ctx, widget->bg_color);
@@ -27,7 +27,7 @@ void widget_update(Layer *layer, GContext *ctx) {
     }
 }
 
-Widget *widget_create(
+RadialWidget *widget_radial_create(
     GRect bounds,
     GColor bg_color,
     GColor fg_color,
@@ -36,18 +36,18 @@ Widget *widget_create(
     GFont font,
     int line_height
 ) {
-    Widget *widget = malloc(sizeof(Widget));
+    RadialWidget *widget = malloc(sizeof(RadialWidget));
     if (!widget) return NULL;
 
-    widget->layer = layer_create_with_data(bounds, sizeof(Widget *));
+    widget->layer = layer_create_with_data(bounds, sizeof(RadialWidget *));
     if (!widget->layer) {
         free(widget);
         return NULL;
     }
 
     // Attach user data
-    *(Widget **)layer_get_data(widget->layer) = widget;
-    layer_set_update_proc(widget->layer, widget_update);
+    *(RadialWidget **)layer_get_data(widget->layer) = widget;
+    layer_set_update_proc(widget->layer, widget_radial_update);
 
     widget->line_thickness = line_thickness;
     widget->bg_color = bg_color;
@@ -70,7 +70,7 @@ Widget *widget_create(
     return widget;
 }
 
-void widget_set_data(Widget *widget, const char *text, float progress) {
+void widget_radial_set(RadialWidget *widget, const char *text, float progress) {
     if (widget && widget->text_layer) {
         text_layer_set_text(widget->text_layer, text);
         widget->progress = progress;
@@ -78,7 +78,7 @@ void widget_set_data(Widget *widget, const char *text, float progress) {
     }
 }
 
-void widget_destroy(Widget *widget) {
+void widget_radial_destroy(RadialWidget *widget) {
     if (!widget) return;
     if (widget->text_layer) {
         text_layer_destroy(widget->text_layer);

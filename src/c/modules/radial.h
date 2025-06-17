@@ -17,9 +17,9 @@ typedef struct {
     TextLayer *text_layer;
     int line_height;
     GFont font;
-} Widget;
+} RadialWidget;
 
-Widget *widget_create(
+RadialWidget *widget_radial_create(
     GRect bounds,
     GColor bg_color,
     GColor fg_color,
@@ -28,7 +28,7 @@ Widget *widget_create(
     GFont font,
     int line_height
 );
-void widget_destroy(Widget *widget);
-void widget_update(Layer *layer, GContext *ctx);
+void widget_radial_destroy(RadialWidget *widget);
+void widget_radial_update(Layer *layer, GContext *ctx);
 
-void widget_set_data(Widget *widget, const char *text, float progress);
+void widget_radial_set(RadialWidget *widget, const char *text, float progress);
