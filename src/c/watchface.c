@@ -5,20 +5,34 @@
 static Window *s_main_window;
 
 static GFont s_small_font;
+static GFont s_medium_font;
+static GFont s_large_fount;
 
 static RadialWidget *s_radial_seconds;
 static RadialWidget *s_radial_battery;
 static BigDigitWidget *s_digit_hour_tens;
 static BigDigitWidget *s_digit_hour_ones;
+static TextLayer *s_date_layer;
+static TextLayer *s_day_layer;
 
 // widget update handlers
 static void seconds_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-    static char buffer[16];
-    strftime(buffer, sizeof(buffer), "%S", tick_time);
+    static char s_buffer[16];
+    strftime(s_buffer, sizeof(s_buffer), "%S", tick_time);
 
-    widget_radial_set(s_radial_seconds, buffer, (float)(tick_time->tm_sec) / SECONDS_PER_MINUTE);
+    widget_radial_set(s_radial_seconds, s_buffer, (float)(tick_time->tm_sec) / SECONDS_PER_MINUTE);
     widget_big_digit_set(s_digit_hour_tens, tick_time->tm_sec / 10); // Display last digit of seconds
     widget_big_digit_set(s_digit_hour_ones, tick_time->tm_sec % 10); // Display tens of seconds
+    
+    // Update date layer
+    static char buffer[16];
+    strftime(buffer, sizeof(buffer), "%y %m %d", tick_time);
+    text_layer_set_text(s_date_layer, buffer);
+
+    // Update day layer
+    static char day_buffer[16];
+    strftime(day_buffer, sizeof(day_buffer), "%A", tick_time);
+    text_layer_set_text(s_day_layer, day_buffer);
   }
 static void battery_handler(BatteryChargeState charge_state) {
     static char buffer[16];
@@ -33,7 +47,32 @@ static void main_window_load(Window *window) {
   GRect bounds = layer_get_bounds(window_layer);
 
   s_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
-  
+  s_medium_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_24));
+  s_large_fount = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_48));
+
+  int date_height = 24; // Height of the date layer
+
+  s_day_layer = text_layer_create(
+    GRect(0, (bounds.size.h + IMG_HEIGHT) / 2 - 5, bounds.size.w, date_height + 5)
+  );
+  text_layer_set_background_color(s_day_layer, GColorClear);
+  text_layer_set_text_color(s_day_layer, GColorWhite);
+  text_layer_set_font(s_day_layer, s_medium_font);
+  text_layer_set_text_alignment(s_day_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_day_layer, "Wednesday");
+  layer_add_child(window_layer, text_layer_get_layer(s_day_layer));
+
+  s_date_layer = text_layer_create(
+    GRect(0, (bounds.size.h + IMG_HEIGHT) / 2 + date_height - 5, bounds.size.w, date_height)
+  );
+  text_layer_set_background_color(s_date_layer, GColorClear);
+  text_layer_set_text_color(s_date_layer, GColorWhite);
+  text_layer_set_font(s_date_layer, s_medium_font);
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_date_layer, "44 44 44");
+  layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
+
+
   // radial seconds widget
   s_radial_seconds = widget_radial_create(
     GRect(0, 0, 32, 32),
@@ -79,13 +118,18 @@ static void main_window_load(Window *window) {
 
 // widget destruction
 static void main_window_unload(Window *window) {
+  text_layer_destroy(s_date_layer);
+  
   widget_radial_destroy(s_radial_seconds);
   widget_radial_destroy(s_radial_battery);
   widget_big_digit_destroy(s_digit_hour_tens);
   widget_big_digit_destroy(s_digit_hour_ones);
 
   widget_big_digit_unload_images();
+
   fonts_unload_custom_font(s_small_font);
+  fonts_unload_custom_font(s_medium_font);
+  fonts_unload_custom_font(s_large_fount);
 }
   
 static void init() {
