@@ -30,8 +30,8 @@
       "media": [
         {
           "type": "font",
-          "name": "FONT_RUBIK_14",
-          "file": "rubik.ttf"
+          "name": "FONT_RUBIK_18",
+          "file": "rubik-semi-bold.ttf"
         },
         {
           "type": "font",

@@ -14,6 +14,7 @@ static BigDigitWidget *s_digit_hour_tens;
 static BigDigitWidget *s_digit_hour_ones;
 static TextLayer *s_date_layer;
 static TextLayer *s_day_layer;
+static TextLayer *s_hour_layer;
 
 // widget update handlers
 static void seconds_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -21,8 +22,8 @@ static void seconds_tick_handler(struct tm *tick_time, TimeUnits units_changed) 
     strftime(s_buffer, sizeof(s_buffer), "%S", tick_time);
 
     widget_radial_set(s_radial_seconds, s_buffer, (float)(tick_time->tm_sec) / SECONDS_PER_MINUTE);
-    widget_big_digit_set(s_digit_hour_tens, tick_time->tm_sec / 10); // Display last digit of seconds
-    widget_big_digit_set(s_digit_hour_ones, tick_time->tm_sec % 10); // Display tens of seconds
+    widget_big_digit_set(s_digit_hour_tens, tick_time->tm_min / 10); // Display last digit of seconds
+    widget_big_digit_set(s_digit_hour_ones, tick_time->tm_min % 10); // Display tens of seconds
     
     // Update date layer
     static char buffer[16];
@@ -33,6 +34,12 @@ static void seconds_tick_handler(struct tm *tick_time, TimeUnits units_changed) 
     static char day_buffer[16];
     strftime(day_buffer, sizeof(day_buffer), "%A", tick_time);
     text_layer_set_text(s_day_layer, day_buffer);
+
+    // Update hour layer
+    static char hour_buffer[16];
+    strftime(hour_buffer, sizeof(hour_buffer), "%H", tick_time);
+    text_layer_set_text(s_hour_layer, hour_buffer);
+
   }
 static void battery_handler(BatteryChargeState charge_state) {
     static char buffer[16];
@@ -46,7 +53,7 @@ static void main_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  s_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_14));
+  s_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_18));
   s_medium_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_24));
   s_large_fount = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUBIK_48));
 
@@ -72,39 +79,48 @@ static void main_window_load(Window *window) {
   text_layer_set_text(s_date_layer, "44 44 44");
   layer_add_child(window_layer, text_layer_get_layer(s_date_layer));
 
+  s_hour_layer = text_layer_create(
+    GRect(0, -10, bounds.size.w, 48)
+  );
+  text_layer_set_background_color(s_hour_layer, GColorClear);
+  text_layer_set_text_color(s_hour_layer, GColorWhite);
+  text_layer_set_font(s_hour_layer, s_large_fount);
+  text_layer_set_text_alignment(s_hour_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_hour_layer, "00");
+  layer_add_child(window_layer, text_layer_get_layer(s_hour_layer));
 
   // radial seconds widget
   s_radial_seconds = widget_radial_create(
-    GRect(0, 0, 32, 32),
+    GRect(0, 0, 40, 40),
     GColorBlack,
     GColorWhite,
-    4, // line thickness
+    6, // line thickness
     true, // clockwise
     s_small_font,
-    19 // text line_height
+    18 * 1.3 // text line_height
   );
   layer_add_child(window_layer, s_radial_seconds->layer);
 
   // radial battery layer
   s_radial_battery = widget_radial_create(
-    GRect(32, 0, 32, 32),
+    GRect(bounds.size.w-40, 0, 40, 40),
     GColorBlack,
     GColorWhite,
-    4, // line thickness
+    6, // line thickness
     false, // anti-clockwise
     s_small_font,
-    19 // text line_height
+    18 * 1.3 // text line_height
   );
   layer_add_child(window_layer, s_radial_battery->layer);
 
   // big digit test widget
   s_digit_hour_tens = widget_big_digit_create(
-    GPoint(0, (bounds.size.h - IMG_HEIGHT) / 2),
+    GPoint(bounds.size.w / 2 - IMG_WIDTH, (bounds.size.h - IMG_HEIGHT) / 2),
     5 // number to display
   );
   layer_add_child(window_layer, s_digit_hour_tens->layer);
   s_digit_hour_ones = widget_big_digit_create(
-    GPoint(IMG_WIDTH, (bounds.size.h - IMG_HEIGHT) / 2),
+    GPoint(bounds.size.w / 2, (bounds.size.h - IMG_HEIGHT) / 2),
     3 // number to display
   );
   layer_add_child(window_layer, s_digit_hour_ones->layer);
