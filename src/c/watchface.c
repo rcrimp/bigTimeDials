@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "modules/radial.h"
+#include "modules/big_digit.h"
 
 static Window *s_main_window;
 
@@ -7,6 +8,8 @@ static GFont s_small_font;
 
 static RadialWidget *s_radial_seconds;
 static RadialWidget *s_radial_battery;
+static BigDigitWidget *s_digit_hour_tens;
+static BigDigitWidget *s_digit_hour_ones;
 
 // widget update handlers
 static void seconds_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -14,7 +17,9 @@ static void seconds_tick_handler(struct tm *tick_time, TimeUnits units_changed) 
     strftime(buffer, sizeof(buffer), "%S", tick_time);
 
     widget_radial_set(s_radial_seconds, buffer, (float)(tick_time->tm_sec) / SECONDS_PER_MINUTE);
-}
+    widget_big_digit_set(s_digit_hour_tens, tick_time->tm_sec / 10); // Display last digit of seconds
+    widget_big_digit_set(s_digit_hour_ones, tick_time->tm_sec % 10); // Display tens of seconds
+  }
 static void battery_handler(BatteryChargeState charge_state) {
     static char buffer[16];
     snprintf(buffer, sizeof(buffer), "%d", charge_state.charge_percent);
@@ -53,16 +58,33 @@ static void main_window_load(Window *window) {
   );
   layer_add_child(window_layer, s_radial_battery->layer);
 
+  // big digit test widget
+  s_digit_hour_tens = widget_big_digit_create(
+    GPoint(0, (bounds.size.h - IMG_HEIGHT) / 2),
+    5 // number to display
+  );
+  layer_add_child(window_layer, s_digit_hour_tens->layer);
+  s_digit_hour_ones = widget_big_digit_create(
+    GPoint(IMG_WIDTH, (bounds.size.h - IMG_HEIGHT) / 2),
+    3 // number to display
+  );
+  layer_add_child(window_layer, s_digit_hour_ones->layer);
+
   // placeholder
   seconds_tick_handler(localtime(&(time_t){time(NULL)}), SECOND_UNIT);
   battery_handler(battery_state_service_peek());
-
+  
+  // layer_mark_dirty(s_digit_hour_tens->layer);
 }
 
 // widget destruction
 static void main_window_unload(Window *window) {
   widget_radial_destroy(s_radial_seconds);
   widget_radial_destroy(s_radial_battery);
+  widget_big_digit_destroy(s_digit_hour_tens);
+  widget_big_digit_destroy(s_digit_hour_ones);
+
+  widget_big_digit_unload_images();
   fonts_unload_custom_font(s_small_font);
 }
   
