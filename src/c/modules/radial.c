@@ -7,8 +7,8 @@ void widget_radial_update(Layer *layer, GContext *ctx) {
     RadialWidget *widget = *(RadialWidget **)layer_get_data(layer);
     GRect bounds = layer_get_bounds(layer);
 
-    graphics_context_set_fill_color(ctx, widget->bg_color);
-    graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+    // graphics_context_set_fill_color(ctx, widget->bg_color);
+    // graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
     graphics_context_set_fill_color(ctx, widget->fg_color);
     
