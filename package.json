@@ -1,14 +1,14 @@
 {
-  "name": "bigtime",
+  "name": "bigtimedials",
   "author": "Reuben Crimp",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "keywords": [
     "pebble-app"
   ],
   "private": false,
   "dependencies": {},
   "pebble": {
-    "displayName": "bigTime",
+    "displayName": "Dials",
     "uuid": "0dee888a-b5db-4d39-af0b-e16617ffb98c",
     "sdkVersion": "3",
     "enableMultiJS": true,
