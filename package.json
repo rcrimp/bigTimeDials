@@ -9,7 +9,7 @@
   "dependencies": {},
   "pebble": {
     "displayName": "bigTime",
-    "uuid": "f5fc9894-b86c-4b79-9b10-5fe2cc644c2a",
+    "uuid": "0dee888a-b5db-4d39-af0b-e16617ffb98c",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
